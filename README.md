@@ -5,7 +5,7 @@
 ## Запуск проекта
 
 ### Клонирование репозитория
-```bash
+bash
 git clone <https://github.com/YakovlevaAL/iis/tree/main>
 cd /iis
 
