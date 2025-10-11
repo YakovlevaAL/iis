@@ -5,3 +5,4 @@
 <h4>Зустановка в окружение всех требуемых библиотек </h4>
 <h5>pip install pandas </h5>
 <h5>pip install matplotlib</h5>
+
