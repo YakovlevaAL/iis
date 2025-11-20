@@ -112,3 +112,35 @@ git commit -m "Завершение лабораторной работы №1: 
 
 # Отправить на GitHub
 git push origin main
+
+# IIS MLflow Project
+
+Проект по машинному обучению с использованием MLflow для трекинга экспериментов.
+
+## Запуск MLFlow
+
+MLFlow запускается из директории проекта следующей командой:
+
+```bash
+mlflow server \
+    --backend-store-uri sqlite:///mlflow.db \
+    --default-artifact-root ./mlartifacts \
+    --host 0.0.0.0 \
+    --port 5000
+
+ Результаты исследования
+Лучшая модель: baseline_final
+
+Метрика: 1.18 (чем меньше, тем лучше)
+
+Run ID Production модели: $(python3 -c "from mlflow.tracking import MlflowClient; client = MlflowClient(); prod_versions = client.get_latest_versions('baseline_final', stages=['Production']); print(prod_versions[0].run_id if prod_versions else 'NOT_FOUND')")
+
+Параметры модели:
+
+    Алгоритм: CatBoost
+
+    Модель: CatBoostRegressor/native
+
+Выбранные фичи: Использовался оптимальный набор фичей после feature selection
+
+Статус: Модель переведена в Production в MLflow Model Registry   
