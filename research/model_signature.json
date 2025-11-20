@@ -1,0 +1,4 @@
+{
+  "inputs": "['Car_Name': string (required), 'Year': long (required), 'Present_Price': double (required), 'Driven_kms': long (required), 'Fuel_Type': string (required), 'Selling_type': string (required), 'Transmission': string (required), 'Owner': long (required)]",
+  "outputs": "[Tensor('float64', (-1,))]"
+}

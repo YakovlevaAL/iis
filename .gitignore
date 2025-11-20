@@ -1,0 +1,43 @@
+# Virtual environment
+.venv*/
+venv*/
+env/
+
+# MLflow artifacts
+mlruns/
+mlartifacts/
+
+# MLflow database
+mlflow.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+*.so
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Data files
+*.csv
+*.parquet
+*.pkl
+*.pickle
+data/

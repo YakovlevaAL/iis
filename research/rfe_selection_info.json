@@ -1,0 +1,16 @@
+{
+  "total_features": 8,
+  "selected_features": 4,
+  "selected_indices": [
+    0,
+    1,
+    6,
+    7
+  ],
+  "selected_feature_names": [
+    "Year",
+    "Present_Price",
+    "Selling_type",
+    "Transmission"
+  ]
+}

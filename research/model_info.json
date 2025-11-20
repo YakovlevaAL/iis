@@ -1,0 +1,28 @@
+{
+  "model_type": "sklearn Pipeline",
+  "steps": [
+    "preprocessor",
+    "RandomForestRegressor"
+  ],
+  "feature_names": {
+    "categorical": [
+      "Car_Name",
+      "Fuel_Type",
+      "Selling_type",
+      "Transmission"
+    ],
+    "numerical": [
+      "Year",
+      "Present_Price",
+      "Driven_kms",
+      "Owner"
+    ]
+  },
+  "metrics": {
+    "mae": 3.0539374999999995,
+    "mape": 4.8186308110870595,
+    "mse": 16.613912898749994,
+    "rmse": 4.076016793236994
+  },
+  "run_id": "6aa4c7c6c65e4fefb6a38536853861ad"
+}

@@ -1,0 +1,4 @@
+Present_Price
+Driven_kms
+Fuel_Type
+Transmission

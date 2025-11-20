@@ -1,0 +1,26 @@
+{
+  "total_features": 8,
+  "selected_features": 4,
+  "selected_indices": [
+    1,
+    2,
+    5,
+    7
+  ],
+  "selected_feature_names": [
+    "Present_Price",
+    "Driven_kms",
+    "Fuel_Type",
+    "Transmission"
+  ],
+  "all_features": [
+    "Year",
+    "Present_Price",
+    "Driven_kms",
+    "Owner",
+    "Car_Name",
+    "Fuel_Type",
+    "Selling_type",
+    "Transmission"
+  ]
+}

@@ -1,0 +1,15 @@
+num_standard__Year
+num_standard__Present_Price
+num_standard__Driven_kms
+num_standard__Owner
+cat_encoder__Car_Name
+cat_encoder__Fuel_Type
+cat_encoder__Selling_type
+cat_encoder__Transmission
+poly_features__Present_Price
+poly_features__Driven_kms
+poly_features__Present_Price^2
+poly_features__Present_Price Driven_kms
+poly_features__Driven_kms^2
+bins_discretizer__Year
+bins_discretizer__Present_Price
