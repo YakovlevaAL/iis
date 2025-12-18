@@ -144,3 +144,95 @@ Run ID Production модели: $(python3 -c "from mlflow.tracking import Mlflow
 Выбранные фичи: Использовался оптимальный набор фичей после feature selection
 
 Статус: Модель переведена в Production в MLflow Model Registry   
+
+## Лабораторная работа 3: Создание сервиса предсказаний
+Команды для запуска контейнера
+
+sudo docker run -d -p 8000:8000 \
+-v $(pwd)/../models:/models \
+--name car-service \
+car-price-predictor:1
+
+# Просмотр запущенных контейнеров
+sudo docker ps
+
+# Просмотр логов контейнера
+sudo docker logs car-service
+
+# Остановка контейнера
+sudo docker stop car-service
+
+# Удаление контейнера
+sudo docker rm car-service
+
+# Удаление образа
+sudo docker rmi car-price-predictor:1
+
+# Проверка здоровья сервиса
+curl http://localhost:8000/health
+
+Тестирование endpoint'ов
+
+# Проверка основного endpoint
+curl http://localhost:8000/
+
+# Ответ:
+# {"Hello":"World"}
+
+# Получение информации о модели
+curl http://localhost:8000/model-info
+
+# Ответ:
+# {"model_type":"<class 'sklearn.ensemble._forest.RandomForestRegressor'>","features_count":8,"feature_names":["Car_Name","Year","Present_Price","Driven_kms","Fuel_Type","Selling_type","Transmission","Owner"]}
+
+Пример запроса для получения предсказания
+
+curl -X POST "http://localhost:8000/api/prediction?item_id=123" \
+-H "Content-Type: application/json" \
+-d '{
+"Car_Name": "verna",
+"Year": 2015,
+"Present_Price": 9.4,
+"Driven_kms": 61381,
+"Fuel_Type": "Petrol",
+"Selling_type": "Dealer",
+"Transmission": "Manual",
+"Owner": 0
+}'
+
+Тело запроса (JSON):
+
+{
+"Car_Name": "verna",
+"Year": 2015,
+"Present_Price": 9.4,
+"Driven_kms": 61381,
+"Fuel_Type": "Petrol",
+"Selling_type": "Dealer",
+"Transmission": "Manual",
+"Owner": 0
+}
+{
+"item_id": 123,
+"price": 5.107225942139497
+}
+
+Локальный запуск (без Docker)
+
+# Активация виртуального окружения
+source .venv_new/bin/activate
+
+# Установка зависимостей
+pip install -r services/ml_service/requirements.txt
+
+# Запуск сервера
+cd services/ml_service
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+Тестирование модели
+
+# Запуск тестового скрипта
+cd services/models
+python get_model.py
+
+# Создание тестовой модели
+python create_test_model.py
