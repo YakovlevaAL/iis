@@ -236,3 +236,97 @@ python get_model.py
 
 # Создание тестовой модели
 python create_test_model.py
+
+
+
+### 🚀 Используемые технологии
+- **Бэкенд**: Python 3.11, FastAPI, Uvicorn
+- **Машинное обучение**: Scikit-learn, Pandas, NumPy
+- **Контейнеризация**: Docker, Docker Compose
+- **Мониторинг**: Prometheus, Grafana
+- **База данных**: PostgreSQL (опционально), pgAdmin
+- **Тестирование**: Requests, Custom load testing service
+- **Метрики**: Prometheus Client для Python
+is/
+├── services/
+│ ├── ml_service/ # ML-микросервис (FastAPI)
+│ │ ├── main.py # Основное приложение с эндпоинтами
+│ │ ├── api_handler.py # Обработчик ML-модели
+│ │ ├── model.pkl # Сериализованная ML-модель
+│ │ ├── requirements.txt # Зависимости Python
+│ │ └── Dockerfile # Конфигурация Docker образа
+│ ├── requests/ # Сервис нагрузочного тестирования
+│ │ ├── request_sender.py # Скрипт отправки запросов
+│ │ ├── requirements.txt # Зависимости (requests)
+│ │ └── Dockerfile # Конфигурация Docker образа
+│ ├── prometheus/ # Конфигурация системы мониторинга
+│ │ └── prometheus.yml # Конфиг Prometheus (цели, интервалы)
+│ ├── grafana/ # Дашборды Grafana (экспортируемые)
+│ ├── database/ # Конфигурация БД (опционально)
+│ │ ├── data/ # Тома для PostgreSQL
+│ │ └── pgadmin/ # Тома для pgAdmin
+│ └── compose.yml # Docker Compose конфигурация
+├── screenshots/ # Скриншоты графиков мониторинга
+├── .venv_new/ # Виртуальное окружение Python
+├── .gitignore # Игнорируемые файлы Git
+└── README.md # Эта документация
+
+
+### Предварительные требования
+- Docker и Docker Compose установлены
+- Git для клонирования репозитория
+
+### Быстрый запуск
+```bash
+# Клонировать репозиторий
+git clone https://github.com/YakovlevaAL/iis.git
+cd iis
+
+# Запустить все сервисы
+cd services
+docker-compose up -d
+
+
+# Запуск всех сервисов
+docker-compose up -d
+
+# Остановка всех сервисов
+docker-compose down
+
+# Просмотр логов
+docker-compose logs -f ml_service
+docker-compose logs -f prometheus
+
+# Пересборка образов
+docker-compose up -d --build
+
+# Проверка статуса
+docker-compose ps
+
+
+# Создание виртуального окружения
+python3 -m venv .venv_new
+source .venv_new/bin/activate
+
+# Установка зависимостей
+pip install -r services/ml_service/requirements.txt
+pip install -r services/requests/requirements.txt
+
+# Запуск ML-сервиса локально
+cd services/ml_service
+uvicorn main:app --reload --port 8000
+
+# Запуск скрипта тестирования
+cd ../requests
+python request_sender.py
+
+
+Сборка Docker образов
+
+# ML-сервис
+cd services/ml_service
+docker build -t car-price-predictor:3 .
+
+# Сервис тестирования
+cd ../requests
+docker build -t requests-service:1 .

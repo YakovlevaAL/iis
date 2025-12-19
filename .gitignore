@@ -1,43 +1,38 @@
-# Virtual environment
+# Виртуальные окружения
 .venv*/
 venv*/
-env/
 
-# MLflow artifacts
-mlruns/
-mlartifacts/
-
-# MLflow database
-mlflow.db
-
-# Python
+# Питон
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-pip-log.txt
+*.py[cod]
+*$py.class
 *.so
-.pytest_cache/
+.Python
+
+# Логи и данные
+*.log
+*.sql
+*.sqlite
+*.db
+
+# ОС
+.DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Data files
-*.csv
-*.parquet
-*.pkl
-*.pickle
+# Docker
 data/
+*.tar.gz
+
+# Модели ML (кроме финальной)
+models/
+!services/ml_service/model.pkl
+
+# Временные файлы
+temp/
+tmp/
