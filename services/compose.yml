@@ -1,27 +1,16 @@
 version: '3.8'
 
 services:
-  # Сервис ML предсказаний v3 (с метриками)
   ml_service:
-    image: car-price-predictor:3  # используем версию 3 с метриками
-    # build: ./ml_service  # раскомментировать если нужно собрать
+    image: car-price-predictor:3
     container_name: ml_service
     ports:
-      - "8001:8000"
-    environment:
-      - MODEL_PATH=/app/model.pkl
+      - "8000:8000"
     networks:
       - ml-network
-    # healthcheck:  # можно добавить позже
-    #   test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
 
-  # Сервис отправки запросов
   requests_service:
     image: requests-service:1
-    # build: ./requests
     container_name: requests_service
     depends_on:
       - ml_service
@@ -30,7 +19,6 @@ services:
     networks:
       - ml-network
 
-  # Prometheus для мониторинга
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -42,12 +30,24 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention.time=200h'
-      - '--web.enable-lifecycle'
     networks:
       - ml-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana:/var/lib/grafana
+    networks:
+      - ml-network
+    depends_on:
+      - prometheus
     restart: unless-stopped
 
 volumes:
