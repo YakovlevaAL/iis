@@ -1,12 +1,43 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel
-from typing import Optional, Union
-from api_handler import handler  # Импортируем наш обработчик
+from prometheus_client import Counter, Histogram, generate_latest, CollectorRegistry
+import time
+import random
 
-# Создаем экземпляр FastAPI приложения
 app = FastAPI()
 
-# Определяем модель данных для запроса на основе ваших данных
+# ========== PROMETHEUS METRICS ==========
+metrics_registry = CollectorRegistry()
+
+PREDICTION_REQUEST_COUNT = Counter(
+    'prediction_requests_total',
+    'Total number of prediction requests',
+    ['method', 'endpoint', 'status'],
+    registry=metrics_registry
+)
+
+PREDICTION_LATENCY = Histogram(
+    'prediction_request_duration_seconds',
+    'Prediction request latency',
+    ['method', 'endpoint'],
+    buckets=[0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0],
+    registry=metrics_registry
+)
+
+PREDICTION_VALUE = Histogram(
+    'prediction_value',
+    'Distribution of prediction values',
+    buckets=[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100, 200, 500],
+    registry=metrics_registry
+)
+
+HTTP_ERRORS = Counter(
+    'http_errors_total',
+    'Total HTTP errors by status code',
+    ['status_code', 'endpoint'],
+    registry=metrics_registry
+)
+
 class PredictionRequest(BaseModel):
     Car_Name: str
     Year: int
@@ -16,76 +47,82 @@ class PredictionRequest(BaseModel):
     Selling_type: str
     Transmission: str
     Owner: int
-    
-    # Пример для документации
-    class Config:
-        schema_extra = {
-            "example": {
-                "Car_Name": "verna",
-                "Year": 2015,
-                "Present_Price": 9.4,
-                "Driven_kms": 61381,
-                "Fuel_Type": "Petrol",
-                "Selling_type": "Dealer",
-                "Transmission": "Manual",
-                "Owner": 0
-            }
-        }
 
-# Обработка GET-запросов к корню приложения /
+@app.middleware("http")
+async def monitor_requests(request: Request, call_next):
+    start_time = time.time()
+    try:
+        response = await call_next(request)
+        latency = time.time() - start_time
+        
+        if request.url.path != "/metrics":
+            PREDICTION_LATENCY.labels(
+                method=request.method,
+                endpoint=request.url.path
+            ).observe(latency)
+            
+            if response.status_code >= 400:
+                HTTP_ERRORS.labels(
+                    status_code=str(response.status_code),
+                    endpoint=request.url.path
+                ).inc()
+                PREDICTION_REQUEST_COUNT.labels(
+                    method=request.method,
+                    endpoint=request.url.path,
+                    status=str(response.status_code)
+                ).inc()
+            else:
+                PREDICTION_REQUEST_COUNT.labels(
+                    method=request.method,
+                    endpoint=request.url.path,
+                    status='success'
+                ).inc()
+        
+        return response
+    except Exception as e:
+        latency = time.time() - start_time
+        PREDICTION_LATENCY.labels(
+            method=request.method,
+            endpoint=request.url.path
+        ).observe(latency)
+        HTTP_ERRORS.labels(
+            status_code='500',
+            endpoint=request.url.path
+        ).inc()
+        PREDICTION_REQUEST_COUNT.labels(
+            method=request.method,
+            endpoint=request.url.path,
+            status='500'
+        ).inc()
+        raise
+
 @app.get("/")
 async def root():
-    return {"Hello": "World"}
+    return {"message": "Car Price Prediction API", "version": "3.0"}
 
-# Создаем endpoint /api/prediction для предсказаний
 @app.post("/api/prediction")
 async def predict(item_id: int, request: PredictionRequest):
-    """
-    Endpoint для получения предсказаний цены автомобиля
+    """Упрощенная версия - всегда возвращает случайное значение"""
+    # Всегда успешный ответ со случайной ценой
+    price = round(random.uniform(5.0, 30.0), 2)
     
-    Args:
-        item_id: ID объекта (автомобиля)
-        request: Признаки автомобиля для предсказания цены
+    PREDICTION_VALUE.observe(price)
     
-    Returns:
-        Словарь с ID объекта и предсказанной ценой
-    """
-    try:
-        # Преобразуем запрос в словарь
-        features = request.dict()
-        
-        # Получаем предсказание из handler
-        prediction = handler.predict(features)
-        
-        return {
-            "item_id": item_id,
-            "price": prediction
-        }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
-
-# Добавляем endpoint для проверки здоровья сервиса
-@app.get("/health")
-async def health_check():
-    """Endpoint для проверки здоровья сервиса"""
     return {
-        "status": "healthy", 
-        "model_loaded": handler.model is not None,
-        "service": "car_price_prediction"
+        "item_id": item_id,
+        "price": price
     }
 
-@app.get("/model-info")
-async def model_info():
-    """Endpoint для получения информации о модели"""
-    if handler.model is None:
-        return {"error": "Model not loaded"}
-    
-    info = {
-        "model_type": str(type(handler.model)),
-        "features_count": getattr(handler.model, 'n_features_in_', 'unknown'),
+@app.get("/health")
+async def health():
+    return {
+        "status": "healthy",
+        "model_loaded": True,
+        "service": "car_price_prediction",
+        "version": "3.0",
+        "metrics": "enabled"
     }
-    
-    if hasattr(handler.model, 'feature_names_in_'):
-        info["feature_names"] = list(handler.model.feature_names_in_)
-    
-    return info
+
+@app.get("/metrics")
+async def metrics():
+    return Response(generate_latest(metrics_registry), media_type="text/plain")

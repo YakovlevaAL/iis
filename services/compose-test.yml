@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  ml_service:
+    image: car-price-predictor:2
+    container_name: ml_service
+    ports:
+      - "8000:8000"
+    networks:
+      - ml-network
+
+  requests_service:
+    image: requests-service:1
+    container_name: requests_service
+    depends_on:
+      - ml_service
+    environment:
+      - DOCKER_ENV=true
+    networks:
+      - ml-network
+
+networks:
+  ml-network:
+    driver: bridge
